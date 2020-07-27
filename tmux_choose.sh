@@ -1,57 +1,86 @@
 #!/bin/bash 
-ARRAY=()
-RES=0
+ARRAY=("New" "Nothing")
+Counter=1
 p=""
 
 if [[ -z "${TMUX}" ]]; then  #Detect if $TMUX is set.
-	while [[ -z "$name" ]]
+	while [[ -z "$number" ]]
 	do
-        echo "SESSIONS AVALAIBLE :"
-		echo "================================================================================================================="
-		tmux ls
-		echo "new: Create a new session."
-		echo "No: Not using TMUX"
-		echo -e "================================================================================================================= \n"
+        #echo "SESSIONS AVALAIBLE :"
+		
+		#echo "================================================================================================================="
+		#tmux ls
+		#echo "new: Create a new session."
+		#echo "No: Not using TMUX"
+		echo -e "================================================================================================================="
 		arr=$(tmux ls |awk '{print $1}' | cut -d ":" -f1)
 		while read p; do
   			ARRAY+=($p)	
 		done <<< "$arr"
+		for i in "${ARRAY[@]}"
+		do
+			echo $Counter. $i
+			Counter=$((Counter+1))
+		done
+        echo "================================================================================================================="
 		echo "Which session do we need ?"
-		read -p "Session Name : " name
-		echo $(date) $name >> /var/log/tmux_choose.log
-		echo ""
-		hex=$(echo "$name" |xxd -p) 
-		if [[ $name == *"echo"* ]]; then #RemoteSSH_tricks
-                  exit
-                fi
-		if [[ $name == "new" ]]; then #Create Session
-			read -p "Name for the session? : " session
-			tmux new -s $session
+		read -p "Session Numbers : " number
+		number=$((number-1))
+		#echo $(date) $number >> /var/log/tmux_choose.log #LOGGING CMDLINE
+		hex=$(echo "$number" |xxd -p) 
+		#if [[ "${ARRAY["$number"]}" == *"echo"* ]]; then #RemoteSSH_tricks
+        #          exit
+        #        fi
+		echo ${ARRAY["$number"]}
+		if [[ "${ARRAY["$number"]}" == "New" ]]; then #Create Session
+			read -p "Name for the NEW session? : " session
+			tmux new -s $session -dP
+			echo "$session"
+		    if [ "$session" == "video" ]; then
+				tmux set-environment -t $session HOME /home/rootube
+			    tmux split-window "fish"
+
+				tmux send-keys -t $session "export HOME=/home/rootube;reset;neofetch" C-m
+				tmux select-pane -t 0
+				tmux kill-pan
+				
+				tmux attach -t $session
+				tmux split-window "shell command"
+				exit
+			fi
+			tmux attach -t $session
 			exit
 		fi
 		if [[ "$hex" == '0a' ]]; then #RemoteSSH_tricks
             exit
         fi
-		if [[ $name == "No" ]]; then
+		if [[ ${ARRAY["$number"]} == "Nothing" ]]; then
 			exit
 		fi
-		if [[ " ${ARRAY[*]} " == *$name* ]]; then
-			tmux attach -t $name
-		else
-			if [[ $name == *"video"* ]]; then #VideoSession
-			    tmux new -s $name -dP
-				tmux set-environment -t $name HOME /home/rootube
-				tmux send-keys -t $name:0 "export HOME=/home/rootube;reset;neofetch" C-m #R
+
+		
+	
+		if [ "${ARRAY["$number"]}" == "video" ]; then #VideoSession
+			name=${ARRAY["$number"]}
+			res=$(tmux new -s "$name" -dP 2>&1) #Check if duplicate or not
+			if [[ "$res" == *"duplicate"* ]]; then
+				echo "DUPLICATE"
 				tmux attach -t $name
 				exit
 			fi
-			tput clear
-			tput setaf 3 
-			echo "Retry with the following sessions :"
-			tput clear
-			name=""
+		fi	
 		
-		fi
+		if [[ "${ARRAY[*]}" =~ "${ARRAY["$number"]}" ]]; then #RemoteSSH_tricks
+            tmux attach -t ${ARRAY["$number"]}
+        fi
+
+		#tput clear
+		number=""
+	
+	
+	ARRAY=("New" "Nothing")
+	Counter=1
+	exit
 	done	
 	
 fi
