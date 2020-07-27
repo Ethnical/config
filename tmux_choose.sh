@@ -25,7 +25,7 @@ if [[ -z "${TMUX}" ]]; then  #Detect if $TMUX is set.
         echo "================================================================================================================="
 		echo "Which session do we need ?"
 		read -p "Session Numbers : " number
-		number=$((number-1))
+		number=$((number-1)) #DOIT CHECK SI c'est bien un int
 		#echo $(date) $number >> /var/log/tmux_choose.log #LOGGING CMDLINE
 		hex=$(echo "$number" |xxd -p) 
 		#if [[ "${ARRAY["$number"]}" == *"echo"* ]]; then #RemoteSSH_tricks
@@ -72,15 +72,15 @@ if [[ -z "${TMUX}" ]]; then  #Detect if $TMUX is set.
 		
 		if [[ "${ARRAY[*]}" =~ "${ARRAY["$number"]}" ]]; then #RemoteSSH_tricks
             tmux attach -t ${ARRAY["$number"]}
+			exit
         fi
 
-		#tput clear
+		tput clear
 		number=""
 	
 	
 	ARRAY=("New" "Nothing")
 	Counter=1
-	exit
 	done	
 	
 fi
