@@ -6,9 +6,9 @@ echo "2. Nothing"
 echo -e "================================================================================================================= \n"
 read -p "Choice : " Choice
 hex=$(echo "$Choice" |xxd -p) 
-if [ "$hex" == '0a' ] || [ $Choice == "1" ]; then #default
+if [ "$hex" == '0a' ] || [ "$Choice" == "1" ]; then #default
     ssh root@172.16.0.100 
 fi
-if [ $Choice == "Nothing" ] || [ $Choice == "2" ]; then
+if [ "$Choice" == "Nothing" ] || [ "$Choice" == "2" ]; then
     exit
 fi
