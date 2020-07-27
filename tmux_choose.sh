@@ -18,13 +18,20 @@ if [[ -z "${TMUX}" ]]; then  #Detect if $TMUX is set.
 		done <<< "$arr"
 		echo "Which session do we need ?"
 		read -p "Session Name : " name
+		echo $(date) $name >> /var/log/tmux_choose.log
 		echo ""
-		
+		hex=$(echo "$name" |xxd -p) 
+		if [[ $name == *"echo"* ]]; then #RemoteSSH_tricks
+                  exit
+                fi
 		if [[ $name == "new" ]]; then #Create Session
 			read -p "Name for the session? : " session
 			tmux new -s $session
 			exit
 		fi
+		if [[ "$hex" == '0a' ]]; then #RemoteSSH_tricks
+            exit
+        fi
 		if [[ $name == "No" ]]; then
 			exit
 		fi
@@ -48,3 +55,4 @@ if [[ -z "${TMUX}" ]]; then  #Detect if $TMUX is set.
 	done	
 	
 fi
+
