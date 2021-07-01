@@ -2,7 +2,10 @@
 ARRAY=("New" "Nothing")
 Counter=1
 p=""
-
+if [[ $TERM_PROGRAM == *"vscode"* ]]; then #default
+	   reset
+	   exit
+fi	
 if [[ -z "${TMUX}" ]]; then  #Detect if $TMUX is set.
 	while [[ -z "$number" ]]
 	do
